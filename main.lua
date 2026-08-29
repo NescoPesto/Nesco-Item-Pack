@@ -1,2 +1,90 @@
-local Mod = RegisterMod("Nesco's Items", 1)
-local Napster = Isaac.GetItemIdByName("Napster")
+local mod = RegisterMod("Nesco's Items", 1)
+local napster = Isaac.GetItemIdByName("Napster")
+
+local willSpawn = true
+local damageCalcCalled = false
+local entityVariant = nil
+local entitySubType = nil
+
+-- function to calculate which pickup will be dropped
+-- Odds:
+-- Golden Bomb -> 15%
+-- Golden Key -> 20%
+-- Golden Pill -> 15%
+-- Mega Battery -> 15%
+-- Golden Heart -> 15%
+-- Golden Coin -> 20%
+function mod:NapsterCalculateOdds()
+    local player = Isaac.GetPlayer(0)
+    local rng = player:GetCollectibleRNG(napster)
+    local odds = rng:RandomFloat()
+
+    local goldenBomb = odds >= 0 and odds <= 0.14
+    local goldenKey = odds >= 0.15 and odds <= 0.34
+    local goldenPill = odds >= 0.35 and odds <= 0.49
+    local megaBattery = odds >= 0.50 and odds <= 0.64
+    local goldenHeart = odds >= 0.65 and odds <= 0.79
+    local goldenCoin = odds >= 0.80 and odds <= 0.99
+
+    if goldenBomb then
+        entityVariant = PickupVariant.PICKUP_BOMB
+        entitySubType = BombSubType.BOMB_GOLDEN
+    elseif goldenKey then
+        entityVariant = PickupVariant.PICKUP_KEY
+        entitySubType = KeySubType.KEY_GOLDEN
+    elseif goldenPill then
+        entityVariant = PickupVariant.PICKUP_PILL
+        entitySubType = PillColor.PILL_GOLD
+    elseif megaBattery then
+        entityVariant = PickupVariant.PICKUP_LIL_BATTERY
+        entitySubType = BatterySubType.BATTERY_MEGA
+    elseif goldenHeart then
+        entityVariant = PickupVariant.PICKUP_HEART
+        entitySubType = HeartSubType.HEART_GOLDEN
+    elseif goldenCoin then
+        entityVariant = PickupVariant.PICKUP_COIN
+        entitySubType = CoinSubType.COIN_GOLDEN
+    end
+end
+
+function mod:SpawnPickup()
+    local player = Isaac.GetPlayer(0)
+
+    if willSpawn and player:GetCollectibleNum(napster) > 0 then
+        mod:NapsterCalculateOdds()
+        Isaac.Spawn(EntityType.ENTITY_PICKUP, entityVariant, entitySubType, player.Position, Vector(0,0), nil)
+    else return end
+
+    --reset values after spawning
+    willSpawn = true
+    damageCalcCalled = false
+    entityVariant = nil
+    entitySubType = nil
+end
+
+function mod:CalculateChanceReduction()
+    local player = Isaac.GetPlayer(0)
+    if player:GetCollectibleNum(napster) < 0 then return end --jumps out if doesn't have the item
+
+    local room =  Game():GetRoom()
+    if room ~= RoomType.ROOM_BOSS then return end --jumps out so that it only applies to damage taken in the boss room
+
+    local rng = player:GetCollectibleRNG(napster)
+
+    if not damageCalcCalled then
+        local chance = rng:RandomFloat()
+
+        if chance < 0.5 then
+            willSpawn = false
+        end
+
+        damageCalcCalled = true
+    end
+end
+
+-- Getting hit triggers CalculateChanceReduction()
+mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, mod.CalculateChanceReduction, EntityType.ENTITY_PLAYER)
+
+
+--going to the next floor calls SpawnPickup
+mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, mod.SpawnPickup)

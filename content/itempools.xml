@@ -1,0 +1,5 @@
+<ItemPools>
+    <Pool Name="shop">
+        <Item Name="Napster" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+</ItemPools>
