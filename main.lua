@@ -51,12 +51,13 @@ function mod:SpawnPickup()
     local player = Isaac.GetPlayer(0)
     local spawnPosition = player.Position + Vector(20,20)
 
-    if willSpawn and player:GetCollectibleNum(napster) > 0 then
+    if player:GetCollectibleNum(napster) <= 0 then return
+    elseif willSpawn and player:GetCollectibleNum(napster) > 0 then
         mod:NapsterCalculateOdds()
         SFXManager():Play(SoundEffect.SOUND_THUMBSUP)
         player:PlayExtraAnimation("Happy")
         Isaac.Spawn(EntityType.ENTITY_PICKUP, entityVariant, entitySubType, spawnPosition, Vector(0,0), nil)
-    else 
+    else
         SFXManager():Play(SoundEffect.SOUND_THUMBS_DOWN)
         player:PlayExtraAnimation("Sad")
     end
@@ -72,8 +73,8 @@ function mod:CalculateChanceReduction()
     local player = Isaac.GetPlayer(0)
     if player:GetCollectibleNum(napster) <= 0 then return end --jumps out if doesn't have the item
 
-    local room =  Game():GetRoom()
-    if room.GetType() ~= RoomType.ROOM_BOSS then return end --jumps out so that it only applies to damage taken in the boss room
+    local roomType =  Game():GetRoom():GetType()
+    if roomType ~= RoomType.ROOM_BOSS then return end --jumps out so that it only applies to damage taken in the boss room
 
     local rng = player:GetCollectibleRNG(napster)
 
@@ -84,7 +85,7 @@ function mod:CalculateChanceReduction()
         if chance < 0.5 then
             willSpawn = false
         end
-    
+
     end
 end
 
