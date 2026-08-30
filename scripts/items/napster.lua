@@ -1,5 +1,8 @@
 local napster = Isaac.GetItemIdByName("Napster")
 
+Isaac.GetItemConfig():GetCollectible(napster).Description = "If Isaac goes to the next floor without taking damage, one random pickup will spawn.#If the player takes damage in the boss room, the pickup will have a chance of spawning of 50%#The possible pickups and their odds are spawning are:#Golden Bomb -> 15%#Golden Coin -> 20%#Golden Heart -> 15%#Golden Key -> 20%#Mega Battery -> 15%"
+Isaac.GetItemConfig():GetCollectible(napster).AchievementID = 613
+
 local willSpawn = true
 local damageCalcCalled = false
 local entityVariant = nil
