@@ -62,10 +62,10 @@ function Nesco:SpawnPickup()
     end
 
     --reset values after spawning
-        willSpawn = true
-        damageCalcCalled = false
-        entityVariant = nil
-        entitySubType = nil
+    willSpawn = true
+    damageCalcCalled = false
+    entityVariant = nil
+    entitySubType = nil
 end
 
 function Nesco:CalculateChanceReduction()
