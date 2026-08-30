@@ -1,3 +1,4 @@
 <items gfxroot="gfx/items/" version="1">
     <passive id="1" name="Napster" gfx="napster.png" description="Is that even legal?" quality="3" shopprice="15"/>
+    <trinket cache="damage" name="Last Supper" description="&quot;Take, eat; this is my body.&quot;" gfx="placeholder.png"/>
 </items>
