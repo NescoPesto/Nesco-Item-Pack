@@ -1,3 +1,2 @@
-local mod = RegisterMod("Nesco's Items", 1)
-Nesco = mod
+Nesco = RegisterMod("Nesco's Items", 1)
 include("scripts.items.napster")

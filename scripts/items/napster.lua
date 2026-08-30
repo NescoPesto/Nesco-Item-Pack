@@ -1,4 +1,3 @@
-local mod = Nesco
 local napster = Isaac.GetItemIdByName("Napster")
 
 local willSpawn = true
@@ -14,7 +13,7 @@ local entitySubType = nil
 -- Mega Battery -> 15%
 -- Golden Heart -> 15%
 -- Golden Coin -> 20%
-function mod:NapsterCalculateOdds()
+function Nesco:NapsterCalculateOdds()
     local player = Isaac.GetPlayer(0)
     local rng = player:GetCollectibleRNG(napster)
     local odds = rng:RandomFloat()
@@ -47,13 +46,13 @@ function mod:NapsterCalculateOdds()
     end
 end
 
-function mod:SpawnPickup()
+function Nesco:SpawnPickup()
     local player = Isaac.GetPlayer(0)
     local spawnPosition = player.Position + Vector(20,20)
 
     if player:GetCollectibleNum(napster) <= 0 then return
     elseif willSpawn and player:GetCollectibleNum(napster) > 0 then
-        mod:NapsterCalculateOdds()
+        Nesco:NapsterCalculateOdds()
         SFXManager():Play(SoundEffect.SOUND_THUMBSUP)
         player:PlayExtraAnimation("Happy")
         Isaac.Spawn(EntityType.ENTITY_PICKUP, entityVariant, entitySubType, spawnPosition, Vector(0,0), nil)
@@ -69,7 +68,7 @@ function mod:SpawnPickup()
         entitySubType = nil
 end
 
-function mod:CalculateChanceReduction()
+function Nesco:CalculateChanceReduction()
     local player = Isaac.GetPlayer(0)
     if player:GetCollectibleNum(napster) <= 0 then return end --jumps out if doesn't have the item
 
@@ -90,8 +89,8 @@ function mod:CalculateChanceReduction()
 end
 
 -- Getting hit triggers CalculateChanceReduction()
-mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, mod.CalculateChanceReduction, EntityType.ENTITY_PLAYER)
+Nesco:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Nesco.CalculateChanceReduction, EntityType.ENTITY_PLAYER)
 
 
 --going to the next floor calls SpawnPickup
-mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, mod.SpawnPickup)
+Nesco:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, Nesco.SpawnPickup)
