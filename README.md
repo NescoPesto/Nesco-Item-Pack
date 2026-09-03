@@ -1,5 +1,5 @@
 # Nesco's Item Pack
-This mod is a small item pack that adds 10 items to the game, being 5 passive items and 5 trinkets.
+This mod is a small item pack for The Binding of Isaac Repentance that adds 10 items to the game, those being 5 passive items and 5 trinkets.
 ## Passive Items
 ### Napster
 If Isaac goes to the next floor without taking damage in the boss room, one random pickup will spawn. \
@@ -12,6 +12,7 @@ The possible pickups and their odds are spawning are:
 - Mega Battery -> 15%
 ## Trinkets
 ### Last Supper
-(Description pending)
+Prevents food items from spawning. \
+If playing as Judas, Dark Judas or Tainted Judas also gives a 0.5 damage up.
 ### Monocle
-(Description pending)
+Highlights tainted rocks
