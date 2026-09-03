@@ -15,4 +15,4 @@ The possible pickups and their odds are spawning are:
 Prevents food items from spawning. \
 If playing as Judas, Dark Judas or Tainted Judas also gives a 0.5 damage up.
 ### Monocle
-Highlights tainted rocks
+Highlights tinted rocks and cracked skull
