@@ -1,7 +1,12 @@
 local napster = Isaac.GetItemIdByName("Napster")
 
-Isaac.GetItemConfig():GetCollectible(napster).Description = "If Isaac goes to the next floor without taking damage, one random pickup will spawn.#If the player takes damage in the boss room, the pickup will have a chance of spawning of 50%#The possible pickups and their odds are spawning are:#{{GoldenBomb}} -> 15%#{{Coin}}(Golden) -> 20%#{{GoldenHeart}} -> 15%#{{GoldenKey}} -> 20%#{{Battery}}(Mega) -> 15%"
-Isaac.GetItemConfig():GetCollectible(napster).AchievementID = 613
+-- Isaac.GetItemConfig():GetCollectible(napster).AchievementID = 613
+
+if EID then
+    Nesco:AddCallback("EID_POST_LOAD", function()
+        EID:addCollectible(napster, "#If Isaac goes to the next floor without taking damage in the boss room, one of the following will spawn on next floor:#{{GoldenBomb}} -> 15%#{{Coin}} (Golden) -> 20%#{{GoldenHeart}} -> 15%#{{GoldenKey}} -> 20%#{{Battery}} (Mega) -> 15%#Otherwise there's a 50% chance the pickup will spawn", "Napster", "en")
+    end)
+end
 
 local willSpawn = true
 local damageCalcCalled = false
@@ -16,7 +21,7 @@ local entitySubType = nil
 -- Mega Battery -> 15%
 -- Golden Heart -> 15%
 -- Golden Coin -> 20%
-function Nesco:NapsterCalculateOdds()
+function Nesco:CalculateOdds()
     local player = Isaac.GetPlayer(0)
     local rng = player:GetCollectibleRNG(napster)
     local odds = rng:RandomFloat()
@@ -55,11 +60,12 @@ function Nesco:SpawnPickup()
 
     if player:GetCollectibleNum(napster) <= 0 then return
     elseif willSpawn and player:GetCollectibleNum(napster) > 0 then
-        Nesco:NapsterCalculateOdds()
-        SFXManager():Play(SoundEffect.SOUND_THUMBSUP)
-        player:PlayExtraAnimation("Happy")
-        Isaac.Spawn(EntityType.ENTITY_PICKUP, entityVariant, entitySubType, spawnPosition, Vector(0,0), nil)
-    else
+            Nesco:CalculateOdds()
+            SFXManager():Play(SoundEffect.SOUND_THUMBSUP)
+            player:PlayExtraAnimation("Happy")
+            Isaac.Spawn(EntityType.ENTITY_PICKUP, entityVariant, entitySubType, spawnPosition, Vector(0,0), nil)
+            
+        else
         SFXManager():Play(SoundEffect.SOUND_THUMBS_DOWN)
         player:PlayExtraAnimation("Sad")
     end
@@ -91,9 +97,51 @@ function Nesco:CalculateChanceReduction()
     end
 end
 
+function Nesco:PlaySoundEffect()
+    local roomType =  Game():GetRoom():GetType()
+    if roomType ~= RoomType.ROOM_BOSS then return end
+
+    local player = Game():GetPlayer(0)
+    local soundEffect = Isaac.GetSoundIdByName("DialUp")
+    local boss
+
+    for _, entity in ipairs(Isaac.GetRoomEntities()) do
+        if entity.IsBoss then
+            boss = entity
+        end
+    end
+
+    if player:GetCollectibleNum(napster) > 0 and boss.IsVisible then
+           SFXManager():Play(soundEffect, 1)
+    end
+end
+
 -- Getting hit triggers CalculateChanceReduction()
 Nesco:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Nesco.CalculateChanceReduction, EntityType.ENTITY_PLAYER)
 
 
 --going to the next floor calls SpawnPickup
-Nesco:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, Nesco.SpawnPickup)
+local triggeredNewLevel = false
+Nesco:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function() triggeredNewLevel = true end)
+
+function TrySpawnPickup()
+    if not triggeredNewLevel then return end
+
+    triggeredNewLevel = false
+    Nesco:SpawnPickup()
+end
+
+Nesco:AddCallback(ModCallbacks.MC_POST_UPDATE, TrySpawnPickup)
+
+--going to the boss room triggers sound effect
+local triggeredBossRoomEnter = false
+Nesco:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function () triggeredBossRoomEnter = true end)
+
+function TryPlaySoundEffect()
+    if not triggeredBossRoomEnter then return end
+
+    triggeredBossRoomEnter = false
+    Nesco:PlaySoundEffect()
+end
+
+Nesco:AddCallback(ModCallbacks.MC_POST_UPDATE, TryPlaySoundEffect)
